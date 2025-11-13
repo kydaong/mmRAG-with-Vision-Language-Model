@@ -1,0 +1,45 @@
+# Core RAG Framework
+langchain==0.3.7
+langchain-community==0.3.5
+langchain-openai==0.2.5
+langchain-anthropic==0.3.0
+
+# Document Processing
+unstructured==0.16.9
+pdf2image==1.17.0
+Pillow==11.0.0
+python-magic==0.4.27
+pytesseract==0.3.13
+
+# Vector Databases
+qdrant-client==1.12.1
+chromadb==0.5.23
+
+# Vision-Language Models (Local)
+transformers==4.46.3
+torch==2.5.1
+torchvision==0.20.1
+qwen-vl-utils==0.0.8
+accelerate==1.1.1
+
+# LLM API Providers
+openai==1.54.5
+anthropic==0.39.0
+
+# API Framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.17
+
+# Utilities
+python-dotenv==1.0.1
+pydantic==2.10.2
+pydantic-settings==2.6.1
+
+# Evaluation
+ragas==0.2.5
+
+# Additional helpers
+numpy==1.26.4
+pandas==2.2.3
+tqdm==4.67.1
