@@ -1,3 +1,4 @@
+'''
 import os
 from anthropic import Anthropic
 from dotenv import load_dotenv
@@ -15,4 +16,26 @@ resp = client.messages.create(
 )
 
 print(resp)
+'''
+'''
+from qdrant_client import QdrantClient
+
+# Test 1: Check disk storage
+print("Test 1: Disk storage")
+client_disk = QdrantClient(path="./qdrant_data")
+collections = client_disk.get_collections()
+print(f"Collections: {[c.name for c in collections.collections]}")
+
+'''
+from qdrant_client import QdrantClient
+
+
+# Test 2: Check server
+print("\nTest 2: Server")
+try:
+    client_server = QdrantClient(url="http://localhost:6333")
+    collections = client_server.get_collections()
+    print(f"Collections: {[c.name for c in collections.collections]}")
+except Exception as e:
+    print(f"Server not accessible: {e}")
 
