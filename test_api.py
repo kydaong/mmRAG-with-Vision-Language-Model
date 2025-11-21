@@ -27,6 +27,8 @@ collections = client_disk.get_collections()
 print(f"Collections: {[c.name for c in collections.collections]}")
 
 '''
+
+'''
 from qdrant_client import QdrantClient
 
 
@@ -38,4 +40,21 @@ try:
     print(f"Collections: {[c.name for c in collections.collections]}")
 except Exception as e:
     print(f"Server not accessible: {e}")
+'''
+'''
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+print("QDRANT_API_KEY:", os.environ.get("QDRANT_API_KEY"))
+'''
+
+import pydantic_core
+print(pydantic_core.__file__)
+print(pydantic_core.__version__)
+
+
+
+
 

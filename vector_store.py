@@ -4,15 +4,17 @@ Stores both text and image captions for multimodal retrieval
 """
 import json
 import sys
+import os
 from pathlib import Path
 from typing import List, Dict, Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 #from langchain_openai import OpenAIEmbeddings
 from sentence_transformers import SentenceTransformer
-from langchain_community.embeddings import HuggingFaceEmbeddings
+#from langchain_community.embeddings import HuggingFaceEmbeddings   ##langchain import causing library pydantic incompatibility problem
 from tqdm import tqdm
 import uuid
+from dotenv import load_dotenv
 
 
 
@@ -20,27 +22,31 @@ class MultimodalVectorStore:
     def __init__(
         self,
         collection_name: str = "oil_gas_multimodal",
-        use_local: bool = True,
+        use_local: bool = False,
         server_url: str = "http://localhost:6333",  #connection to qdrant server
     ):
         self.collection_name = collection_name
+        load_dotenv()
+
         """
         Initialize multimodal vector store with Qdrant
         Uses FREE sentence-transformers for embeddings
         """
-        # Initialize Qdrant client
+        # Initialize Qdrant client  
         if use_local:
             print("Initializing Qdrant (persistent disk storage)...")
             self.client = QdrantClient(path="./qdrant_data")
         else:
             print(f"Connecting to Qdrant server at {server_url}...")
-            self.client = QdrantClient(url=server_url)
+            self.client = QdrantClient(
+                url=server_url,
+                api_key=os.environ.get("QDRANT_API_KEY"))
 
             try:
                 collections = self.client.get_collections()
-                print(f"✅ Connected! Server has {len(collections.collections)} collections")
+                print(f"Connected! Server has {len(collections.collections)} collections")
             except Exception as e:
-                print(f"❌ Connection failed: {e}")
+                print(f"Connection failed: {e}")
                 print("Make sure Qdrant server is running!")
                 raise
         
@@ -48,7 +54,7 @@ class MultimodalVectorStore:
         print("Loading sentence-transformers model...")
         self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
         self.embedding_dim = self.model.get_sentence_embedding_dimension()
-        print(f"✅ Model loaded - Embedding dimension: {self.embedding_dim}")
+        print(f"Model loaded - Embedding dimension: {self.embedding_dim}")
     
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         """Embed multiple texts at once"""
@@ -80,7 +86,7 @@ class MultimodalVectorStore:
                 distance=Distance.COSINE
             )
         )
-        print(f"✅ Collection created: {self.collection_name}")
+        print(f"Collection created: {self.collection_name}")
     
     def add_documents(self, documents: List[Dict], batch_size: int = 32):
         """

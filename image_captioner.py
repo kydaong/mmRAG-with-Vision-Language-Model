@@ -2,6 +2,8 @@
 Image captioner using Claude Sonnet 4.5 (Vision)
 This script done after "doc_processor.ipynb" is tested 
 """
+
+
 import anthropic
 import base64
 import os

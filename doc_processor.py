@@ -132,7 +132,7 @@ class DocumentProcessor:
 
 if __name__ == "__main__":
     processor = DocumentProcessor()
-    documents = processor.process_directory("D:/Projects/mmRAG-with-Vision-Language-Model/PDFs")
+    documents = processor.process_directory("C:/Users/adminuser/Projects/mmRAG-with-Vision-Language-Model/PDFs")
 
     
     print("\n" + "="*60)
@@ -146,5 +146,6 @@ if __name__ == "__main__":
     if documents:
         processor.save_to_json(documents)
     else:
-        print("\n⚠️  No documents extracted. Check your PDF files.")
+        print("\nNo documents extracted. Check your PDF files.")
+        
         

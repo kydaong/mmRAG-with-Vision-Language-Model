@@ -212,3 +212,6 @@ __marimo__/
 *.json
 *.png
 
+#ignore chainlit files
+*.md
+*.toml

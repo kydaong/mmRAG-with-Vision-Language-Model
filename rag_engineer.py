@@ -30,7 +30,7 @@ class MultimodalRAGEngine:
             use_server: If True, connects to Qdrant server
             server_url: Qdrant server URL
         """
-        load_dotenv()
+        load_dotenv()   # need to connect .env to retrieve Qdrant and anthropic api key
         
         # Initialize Claude
         print("Initializing Claude...")
@@ -43,9 +43,13 @@ class MultimodalRAGEngine:
         # Initialize Qdrant
         print("Connecting to Qdrant...")
         if use_server:
-            self.qdrant = QdrantClient(url=server_url)
+            self.qdrant = QdrantClient(
+                url=server_url,
+                api_key=os.environ.get("QDRANT_API_KEY"))
         else:
-            self.qdrant = QdrantClient(path=qdrant_path)
+            self.qdrant = QdrantClient(
+                path=qdrant_path,
+                api_key=os.environ.get("QDRANT_API_KEY"))
         self.collection_name = collection_name
         
         # Initialize embeddings
@@ -71,7 +75,7 @@ class MultimodalRAGEngine:
         Returns:
             Dict with text_results and image_results
         """
-        # Embed query
+        # Embed query -change to vectors
         query_vector = self.embedder.encode(query).tolist()
         
         # Search Qdrant
@@ -85,6 +89,7 @@ class MultimodalRAGEngine:
         text_results = []
         image_results = []
         
+        # You are now trying to retreive the vector source (text and image)
         for result in results:
             doc_type = result.payload.get('type')
             
@@ -112,7 +117,9 @@ class MultimodalRAGEngine:
     def encode_image(self, image_path: str) -> tuple[str, str]:
         """Encode image to base64 for Claude"""
         with open(image_path, "rb") as f:
-            image_data = base64.standard_b64encode(f.read()).decode("utf-8")
+            image_data = base64.standard_b64encode(f.read()).decode("utf-8") 
+            # image files are .png, .jpeg (binary files)
+            # you must convert it into ASCII characters first before sending to claude 
         
         suffix = Path(image_path).suffix.lower()
         media_type_map = {
@@ -171,7 +178,7 @@ class MultimodalRAGEngine:
         ])
         print(f"   ✓ Context built")
         
-        # Build prompt
+        # Build prompt - this is system prompt. Prompt to the llm for it to assume/do according to your request
         prompt = f"""You are an expert Oil & Gas engineer assistant. You answer queries on plant equipment datasheet, plant processes and 
         various international standards. Answer the following question using the provided documentation."
 
@@ -271,12 +278,12 @@ class MultimodalRAGEngine:
                 ]
             }
         
-        print(f"\n✅ Answer generated ({len(answer)} characters)")
+        print(f"\n Answer generated ({len(answer)} characters)")
         
         return result
     
 
-
+'''
 if __name__ == "__main__":
     print("="*60)
     print("TESTING MULTIMODAL RAG ENGINE")
@@ -312,6 +319,61 @@ if __name__ == "__main__":
         
         print("\n" + "="*60)
         input("Press Enter for next query...")    
+'''
+
+
+#this part is added for interactive chat with multimodal RAG. strike off as needed for test.
+
+if __name__ == "__main__":
+    print("="*60)
+    print("MULTIMODAL RAG ENGINE - INTERACTIVE MODE")
+    print("="*60)
+    
+    # Initialize
+    print("\nInitializing RAG engine...")
+    rag = MultimodalRAGEngine(
+        qdrant_path="./qdrant_data",
+        use_server=True
+    )
+    
+    print("\n✅ Ready! Type your questions (or 'quit' to exit)")
+    print("="*60)
+    
+    # Interactive loop
+    while True:
+        # Get user input
+        print("\n" + "="*60)
+        query = input("Your question: ").strip()
+        
+        # Exit condition
+        if query.lower() in ['quit', 'exit', 'q', '']:
+            print("Goodbye!")
+            break
+        
+        # Process query
+        try:
+            result = rag.query(
+                question=query,
+                num_results=5,
+                include_images=True
+            )
+            
+            # Display results
+            print(f"\n{'='*60}")
+            print(f"Q: {result['question']}")
+            print(f"{'='*60}")
+            print(f"\nA: {result['answer']}")
+            
+            if 'sources' in result:
+                print(f"\n📚 Sources:")
+                print(f"   Text: {len(result['sources']['text_documents'])} documents")
+                print(f"   Images: {len(result['sources']['images'])} images")
+            
+            print(f"\n{'='*60}")
+            
+        except Exception as e:
+            print(f"\n❌ Error: {e}")
+            print("Please try another question.")
 
 
 
